@@ -25,7 +25,7 @@
 </nav>
 <div class="container">
   <h2>Assignment Grade</h2>
-  <form class="form-horizontal" role="form" method="post" action="AddToList">
+  <form class="form-horizontal" role="form" method="get" action="AddToList">
     <div class="form-group">
       <label class="control-label col-sm-2" for="assignment">Assignment:</label>
       <div class="col-sm-10">

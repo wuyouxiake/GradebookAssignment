@@ -1,72 +1,70 @@
 import java.io.IOException;
-import java.io.PrintWriter;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Properties;
+import postTools.DBUtil;
+import model.Gradebook;
+
+
+
+import java.util.List;
 
 /**
  * Servlet implementation class GetList
  */
 @WebServlet("/GetList")
 public class GetList extends HttpServlet {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private String fullList;
+
 	public void init() throws ServletException {
 		// Do required initialization
-		fullList="";
+		fullList = "";
 	}
-	
-	@SuppressWarnings("null")
+
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {		
-			try {
-				Class.forName("oracle.jdbc.driver.OracleDriver");
-				String url = "jdbc:oracle:thin:testuser/password@localhost";
-				//properties for creating connection to Oracle database
-		        Properties props = new Properties();
-		        props.setProperty("user", "testdb");
-		        props.setProperty("password", "password");
-		        Connection conn=DriverManager.getConnection(url,props);
-				
-        String sql = "select * from gradebook";
-        PreparedStatement preStatement = conn.prepareStatement(sql);
-		ResultSet result = preStatement.executeQuery();
+			throws ServletException, IOException {
+		try {
+			EntityManager em = DBUtil.getEmFactory().createEntityManager();
+			String qString = "select g from Gradebook g";
+			TypedQuery<Gradebook> q = em.createQuery(qString, Gradebook.class);
+			List<Gradebook> gradeList;
+			gradeList = q.getResultList();
 			
-				while(result.next()){
-					fullList+=("<tr><td>"+result.getString("assignment")+"</td><td>"+result.getString("grade")+"</td></tr>");
-					
-				}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
+			for (int i = 0; i < gradeList.size(); i++) {
+				fullList += ("<tr><td>" + gradeList.get(i).getAssignment()
+						+ "</td><td>" + gradeList.get(i).getGrade() + "</td></tr>");
+				
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
 		// Set response content type
 		response.setContentType("text/html");
 
 		// Actual logic goes here.
-		//PrintWriter out = response.getWriter();
-		//message = "Hello";
-		//out.println("&lt;h1&gt;" + message + "&lt;/h1&gt;");
-		request.setAttribute("fullList",fullList);
-		
-		getServletContext().getRequestDispatcher("/list.jsp").forward(request, response);
-		fullList="";	
-	}
+		// PrintWriter out = response.getWriter();
+		// message = "Hello";
+		// out.println("&lt;h1&gt;" + message + "&lt;/h1&gt;");
+		request.setAttribute("fullList", fullList);
 
+		getServletContext().getRequestDispatcher("/list.jsp").forward(request,
+				response);
+		fullList = "";
+	}
 
 	public void destroy() {
 		// do nothing.
 	}
 
-	
-	
 }
